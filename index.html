@@ -1,707 +1,474 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>GymX Planner</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    :root {
-      --bg: #05060a;
-      --panel: #0b0f1a;
-      --accent: #35d0ff;
-      --accent-soft: rgba(53, 208, 255, 0.15);
-      --text: #f5f7ff;
-      --muted: #8b93b8;
-      --danger: #ff4b6e;
-      --border: #1a2135;
-      --recent: #18263b;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GymX PRO</title>
 
-    * {
-      box-sizing: border-box;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-        sans-serif;
-    }
+<style>
+/* -------------------- */
+/* ESTILO GLOBAL FUTURISTA */
+/* -------------------- */
 
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-    }
+:root {
+  --bg: #05060a;
+  --panel: #0b0f1a;
+  --accent: #35d0ff;
+  --accent-soft: rgba(53, 208, 255, 0.15);
+  --text: #f5f7ff;
+  --muted: #8b93b8;
+  --danger: #ff4b6e;
+  --border: #1a2135;
+  --recent: #18263b;
+}
 
-    body {
-      background: radial-gradient(circle at top, #10152b 0, #05060a 55%);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: stretch;
-      padding: 8px;
-    }
+* {
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+}
 
-    .app {
-      width: 100%;
-      max-width: 1100px;
-      background: linear-gradient(135deg, #05060a 0, #05060a 40%, #0b0f1a 100%);
-      border-radius: 18px;
-      border: 1px solid var(--border);
-      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.7);
-      display: grid;
-      grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
-      overflow: hidden;
-      position: relative;
-      min-height: calc(100vh - 16px);
-    }
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #10152b 0, #05060a 55%);
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+}
 
-    @media (max-width: 800px) {
-      .app {
-        grid-template-columns: 1fr;
-      }
-    }
+/* -------------------- */
+/* LAYOUT PRINCIPAL */
+/* -------------------- */
 
-    /* PANEL IZQUIERDO */
+.app {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
 
-    .panel {
-      position: relative;
-      padding: 16px 16px 18px;
-      background: radial-gradient(circle at top left, #18213b 0, #05060a 55%);
-      border-right: 1px solid var(--border);
-      transition: transform 0.25s ease, opacity 0.25s ease;
-      z-index: 2;
-    }
+@media (max-width: 900px) {
+  .app {
+    grid-template-columns: 1fr;
+  }
+}
 
-    .panel.oculto {
-      transform: translateX(-100%);
-      opacity: 0;
-      pointer-events: none;
-    }
+/* -------------------- */
+/* PANEL LATERAL */
+/* -------------------- */
 
-    .panel-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
+.panel {
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  padding: 16px;
+  overflow-y: auto;
+  transition: transform 0.25s ease;
+  z-index: 10;
+}
 
-    .panel-title {
-      font-size: 1.05rem;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
+.panel.oculto {
+  transform: translateX(-100%);
+}
 
-    .btn-toggle-panel {
-      border: none;
-      background: rgba(5, 6, 10, 0.7);
-      color: var(--muted);
-      border-radius: 999px;
-      padding: 6px 10px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      backdrop-filter: blur(10px);
-      transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.1s;
-    }
+.toggle-panel {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  z-index: 20;
+}
 
-    .btn-toggle-panel span.icon {
-      font-size: 0.9rem;
-    }
+/* -------------------- */
+/* TARJETAS DE MESOCICLOS */
+/* -------------------- */
 
-    .btn-toggle-panel:hover {
-      background: rgba(24, 33, 59, 0.9);
-      color: var(--text);
-      border-color: var(--accent);
-    }
+.meso-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  padding: 14px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
 
-    .btn-toggle-panel:active {
-      transform: scale(0.96);
-    }
+.meso-card:hover {
+  border-color: var(--accent);
+}
 
-    .form {
-      display: grid;
-      gap: 10px;
-      margin-top: 4px;
-    }
+.meso-delete {
+  color: var(--danger);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
 
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
+/* -------------------- */
+/* BOTÓN CREAR MESOCICLO */
+/* -------------------- */
 
-    .field label {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-    }
+.add-meso {
+  background: rgba(53,208,255,0.1);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 14px;
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  margin-top: 10px;
+}
 
-    .field input,
-    .field select {
-      background: rgba(5, 6, 10, 0.9);
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      padding: 8px 10px;
-      color: var(--text);
-      font-size: 0.9rem;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-    }
+/* -------------------- */
+/* CONTENIDO PRINCIPAL */
+/* -------------------- */
 
-    .field input:focus,
-    .field select:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 1px rgba(53, 208, 255, 0.4);
-      background: #05060a;
-    }
+.main {
+  padding: 16px;
+  overflow-y: auto;
+  height: 100%;
+}
 
-    .row-inline {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 8px;
-    }
+/* -------------------- */
+/* PESTAÑAS DE SEMANAS */
+/* -------------------- */
 
-    .row-inline-2 {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-    }
+.week-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
 
-    .btn-save {
-      margin-top: 6px;
-      align-self: flex-end;
-      border: none;
-      cursor: pointer;
-      border-radius: 999px;
-      padding: 8px 12px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      background: radial-gradient(circle at top, #35d0ff 0, #0070f3 55%, #003566 100%);
-      color: #05060a;
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      box-shadow: 0 0 18px rgba(53, 208, 255, 0.7);
-      position: relative;
-      overflow: hidden;
-    }
+.week-tab {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  padding: 12px;
+  text-align: center;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
 
-    .btn-save span.text {
-      display: none; /* solo icono */
-    }
+.week-tab.active {
+  border-color: var(--accent);
+  background: rgba(53,208,255,0.15);
+}
 
-    .btn-save .icon-save {
-      width: 22px;
-      height: 22px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
+/* -------------------- */
+/* LISTA DE EJERCICIOS */
+/* -------------------- */
 
-    .btn-save svg {
-      width: 100%;
-      height: 100%;
-      fill: #05060a;
-      filter: drop-shadow(0 0 6px rgba(5, 6, 10, 0.7));
-    }
+.exercise-list {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px;
+  background: rgba(255,255,255,0.03);
+}
 
-    .btn-save::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        120deg,
-        transparent 0,
-        rgba(255, 255, 255, 0.4) 40%,
-        transparent 80%
-      );
-      transform: translateX(-120%);
-      transition: transform 0.5s ease;
-    }
+.exercise-row {
+  display: grid;
+  grid-template-columns: 1.4fr 0.6fr 0.6fr 0.6fr 0.3fr;
+  padding: 10px 6px;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+}
 
-    .btn-save:hover::after {
-      transform: translateX(120%);
-    }
+.exercise-row:last-child {
+  border-bottom: none;
+}
 
-    .btn-save:active {
-      transform: scale(0.96);
-    }
+.exercise-row.recent {
+  background: var(--recent);
+  border-left: 3px solid var(--accent);
+}
 
-    /* PANEL DERECHO */
+.delete-ex {
+  color: var(--danger);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
 
-    .main {
-      padding: 16px 16px 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      position: relative;
-    }
+/* -------------------- */
+/* FORMULARIO EJERCICIO */
+/* -------------------- */
 
-    .main-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 4px;
-      flex-wrap: wrap;
-    }
+.form {
+  margin-top: 16px;
+  display: grid;
+  gap: 10px;
+}
 
-    .main-title {
-      font-size: 1.05rem;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
+input, select {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  padding: 10px;
+  border-radius: 10px;
+  color: var(--text);
+}
 
-    .hint {
-      font-size: 0.75rem;
-      color: var(--muted);
-      opacity: 0.9;
-    }
+/* -------------------- */
+/* BOTÓN GUARDAR FLOTANTE */
+/* -------------------- */
 
-    .current-block {
-      font-size: 0.8rem;
-      color: var(--accent);
-      background: var(--accent-soft);
-      padding: 4px 10px;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
+.save-btn {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+  font-size: 1.4rem;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(53,208,255,0.6);
+}
 
-    .list {
-      margin-top: 4px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: radial-gradient(circle at top left, #11182b 0, #05060a 60%);
-      padding: 8px;
-      max-height: 70vh;
-      overflow-y: auto;
-    }
-
-    .list-header,
-    .exercise-row {
-      display: grid;
-      grid-template-columns: 1.2fr 0.6fr 0.6fr 0.6fr 0.3fr;
-      gap: 6px;
-      align-items: center;
-      padding: 6px 8px;
-      font-size: 0.8rem;
-    }
-
-    .list-header {
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-size: 0.7rem;
-      color: var(--muted);
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 4px;
-    }
-
-    .exercise-row {
-      border-radius: 10px;
-      background: rgba(5, 6, 10, 0.7);
-      border: 1px solid transparent;
-      transition: background 0.2s, border-color 0.2s, transform 0.1s;
-    }
-
-    .exercise-row.recent {
-      background: var(--recent);
-      border-color: var(--accent);
-      box-shadow: 0 0 12px rgba(53, 208, 255, 0.4);
-    }
-
-    .exercise-row span {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 0.7rem;
-      padding: 2px 7px;
-      border-radius: 999px;
-      background: var(--accent-soft);
-      color: var(--accent);
-      margin-left: 4px;
-    }
-
-    .badge-small {
-      font-size: 0.7rem;
-      color: var(--muted);
-      margin-left: 4px;
-    }
-
-    .btn-delete {
-      border: none;
-      background: transparent;
-      color: var(--danger);
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 999px;
-      width: 26px;
-      height: 26px;
-      transition: background 0.2s, transform 0.1s;
-    }
-
-    .btn-delete:hover {
-      background: rgba(255, 75, 110, 0.12);
-    }
-
-    .btn-delete:active {
-      transform: scale(0.9);
-    }
-
-    .empty {
-      padding: 12px 10px;
-      font-size: 0.8rem;
-      color: var(--muted);
-      text-align: center;
-    }
-
-    /* BOTÓN FLOTANTE PARA MOSTRAR PANEL SI ESTÁ OCULTO (PC Y MÓVIL) */
-
-    .floating-toggle {
-      position: absolute;
-      left: 10px;
-      top: 10px;
-      z-index: 5;
-    }
-  </style>
+</style>
 </head>
+
 <body>
-  <div class="app">
-    <!-- Botón flotante para mostrar panel cuando está oculto -->
-    <button class="btn-toggle-panel floating-toggle" id="btnShowPanel">
-      <span class="icon">📋</span>
-      <span>Panel</span>
-    </button>
 
-    <!-- PANEL IZQUIERDO -->
-    <aside class="panel" id="panel">
-      <div class="panel-header">
-        <div class="panel-title">Nuevo ejercicio</div>
-        <button class="btn-toggle-panel" id="btnHidePanel">
-          <span class="icon">⮜</span>
-          <span>Ocultar</span>
-        </button>
-      </div>
+<div class="app">
 
-      <form class="form" id="exerciseForm">
-        <div class="row-inline-2">
-          <div class="field">
-            <label for="meso">Mesociclo</label>
-            <select id="meso">
-              <option value="1">Mesociclo 1</option>
-              <option value="2">Mesociclo 2</option>
-              <option value="3">Mesociclo 3</option>
-              <option value="4">Mesociclo 4</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="semana">Semana</label>
-            <select id="semana">
-              <option value="1">Semana 1</option>
-              <option value="2">Semana 2</option>
-              <option value="3">Semana 3</option>
-              <option value="4">Semana 4</option>
-            </select>
-          </div>
-        </div>
+<button class="toggle-panel" id="togglePanel">⮜</button>
 
-        <div class="field">
-          <label for="nombre">Ejercicio</label>
-          <input
-            type="text"
-            id="nombre"
-            placeholder="Press banca, sentadilla..."
-            autocomplete="off"
-            required
-          />
-        </div>
+<!-- PANEL LATERAL -->
+<div class="panel" id="panel">
 
-        <div class="row-inline">
-          <div class="field">
-            <label for="series">Series</label>
-            <input
-              type="number"
-              id="series"
-              min="1"
-              max="50"
-              inputmode="numeric"
-              placeholder="4"
-            />
-          </div>
-          <div class="field">
-            <label for="reps">Reps</label>
-            <input
-              type="number"
-              id="reps"
-              min="1"
-              max="100"
-              inputmode="numeric"
-              placeholder="10"
-            />
-          </div>
-          <div class="field">
-            <label for="peso">Peso</label>
-            <input
-              type="number"
-              id="peso"
-              min="0"
-              max="500"
-              step="0.5"
-              inputmode="decimal"
-              placeholder="60 kg"
-            />
-          </div>
-        </div>
+  <h2>Mesociclos</h2>
+  <div id="mesoContainer"></div>
 
-        <div class="field">
-          <label for="grupo">Grupo muscular</label>
-          <select id="grupo">
-            <option value="">Sin especificar</option>
-            <option value="Pecho">Pecho</option>
-            <option value="Espalda">Espalda</option>
-            <option value="Pierna">Pierna</option>
-            <option value="Hombro">Hombro</option>
-            <option value="Bíceps">Bíceps</option>
-            <option value="Tríceps">Tríceps</option>
-            <option value="Core">Core</option>
-          </select>
-        </div>
+  <div class="add-meso" id="addMeso">+ Crear mesociclo</div>
 
-        <button type="submit" class="btn-save" title="Guardar ejercicio">
-          <span class="icon-save">
-            <!-- Icono futurista tipo chip / disco -->
-            <svg viewBox="0 0 24 24">
-              <path
-                d="M5 3h9l5 5v13H5V3zm2 2v14h10V9.5L13.5 5H7zm3 2h2v4h-2V7zm-1 7h6v2H9v-2z"
-              />
-            </svg>
-          </span>
-          <span class="text">Guardar</span>
-        </button>
-      </form>
-    </aside>
+</div>
 
-    <!-- PANEL DERECHO: LISTA -->
-    <main class="main">
-      <div class="main-header">
-        <div>
-          <div class="main-title">Rutina actual</div>
-          <div class="current-block" id="currentBlock">
-            Mesociclo 1 · Semana 1
-          </div>
-        </div>
-        <div class="hint">
-          Se guarda en el dispositivo. El último ejercicio añadido se resalta.
-        </div>
-      </div>
+<!-- CONTENIDO PRINCIPAL -->
+<div class="main">
 
-      <section class="list" id="exerciseList">
-        <div class="list-header">
-          <span>Ejercicio</span>
-          <span>Series</span>
-          <span>Reps</span>
-          <span>Peso</span>
-          <span></span>
-        </div>
-        <div class="empty" id="emptyState">
-          Aún no hay ejercicios en este mesociclo/semana.
-        </div>
-      </section>
-    </main>
+  <h2 id="mesoTitle">Selecciona un mesociclo</h2>
+
+  <div class="week-tabs" id="weekTabs" style="display:none;">
+    <div class="week-tab" data-week="1">Semana 1</div>
+    <div class="week-tab" data-week="2">Semana 2</div>
+    <div class="week-tab" data-week="3">Semana 3</div>
+    <div class="week-tab" data-week="4">Semana 4</div>
   </div>
 
-  <script>
-    const form = document.getElementById("exerciseForm");
-    const list = document.getElementById("exerciseList");
-    const emptyState = document.getElementById("emptyState");
-    const panel = document.getElementById("panel");
-    const btnHidePanel = document.getElementById("btnHidePanel");
-    const btnShowPanel = document.getElementById("btnShowPanel");
-    const mesoSelect = document.getElementById("meso");
-    const semanaSelect = document.getElementById("semana");
-    const currentBlock = document.getElementById("currentBlock");
+  <div class="exercise-list" id="exerciseList"></div>
 
-    const STORAGE_KEY = "gymx-planner-v1";
-    let exercises = [];
-    let lastRecentTimeout = null;
+  <form class="form" id="exerciseForm" style="display:none;">
+    <input id="exName" placeholder="Ejercicio" />
+    <input id="exSeries" placeholder="Series" type="number" />
+    <input id="exReps" placeholder="Reps" type="number" />
+    <input id="exPeso" placeholder="Peso (kg)" type="number" />
+    <select id="exGrupo">
+      <option value="">Grupo muscular</option>
+      <option>Pecho</option>
+      <option>Espalda</option>
+      <option>Pierna</option>
+      <option>Hombro</option>
+      <option>Bíceps</option>
+      <option>Tríceps</option>
+      <option>Core</option>
+    </select>
+  </form>
 
-    function loadFromStorage() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return;
-        const data = JSON.parse(raw);
-        if (Array.isArray(data)) {
-          exercises = data;
-        }
-      } catch (e) {
-        console.error("Error cargando datos", e);
-      }
-    }
+</div>
 
-    function saveToStorage() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(exercises));
-      } catch (e) {
-        console.error("Error guardando datos", e);
-      }
-    }
+<!-- BOTÓN GUARDAR -->
+<div class="save-btn" id="saveBtn">💾</div>
 
-    function updateCurrentBlockLabel() {
-      currentBlock.textContent =
-        "Mesociclo " + mesoSelect.value + " · Semana " + semanaSelect.value;
-    }
+</div>
 
-    function createExerciseRow(item, isRecent) {
-      const row = document.createElement("div");
-      row.className = "exercise-row";
-      if (isRecent) row.classList.add("recent");
+<script>
+/* -------------------- */
+/* ESTADO */
+/* -------------------- */
 
-      row.dataset.id = item.id;
+let data = JSON.parse(localStorage.getItem("gymx-pro") || "{}");
+if (!data.mesos) data.mesos = [];
 
-      row.innerHTML = `
-        <span>
-          ${item.nombre}
-          ${
-            item.grupo
-              ? `<span class="badge">${item.grupo}</span>`
-              : ""
-          }
-          <span class="badge-small">M${item.meso} · S${item.semana}</span>
-        </span>
-        <span>${item.series || "-"}</span>
-        <span>${item.reps || "-"}</span>
-        <span>${item.peso ? item.peso + " kg" : "-"}</span>
-        <button class="btn-delete" title="Eliminar ejercicio">
-          ✕
-        </button>
-      `;
+let currentMeso = null;
+let currentWeek = 1;
 
-      const deleteBtn = row.querySelector(".btn-delete");
-      deleteBtn.addEventListener("click", () => {
-        exercises = exercises.filter((ex) => ex.id !== item.id);
-        saveToStorage();
-        renderList();
-      });
+/* -------------------- */
+/* ELEMENTOS */
+/* -------------------- */
 
-      if (isRecent) {
-        if (lastRecentTimeout) clearTimeout(lastRecentTimeout);
-        lastRecentTimeout = setTimeout(() => {
-          row.classList.remove("recent");
-        }, 3500);
-      }
+const panel = document.getElementById("panel");
+const togglePanel = document.getElementById("togglePanel");
+const mesoContainer = document.getElementById("mesoContainer");
+const addMeso = document.getElementById("addMeso");
+const mesoTitle = document.getElementById("mesoTitle");
+const weekTabs = document.getElementById("weekTabs");
+const exerciseList = document.getElementById("exerciseList");
+const exerciseForm = document.getElementById("exerciseForm");
+const saveBtn = document.getElementById("saveBtn");
 
-      return row;
-    }
+/* -------------------- */
+/* PANEL */
+/* -------------------- */
 
-    function renderList(lastAddedId = null) {
-      const rowsOld = list.querySelectorAll(".exercise-row");
-      rowsOld.forEach((r) => r.remove());
+togglePanel.onclick = () => {
+  panel.classList.toggle("oculto");
+  togglePanel.textContent = panel.classList.contains("oculto") ? "⮞" : "⮜";
+};
 
-      const meso = mesoSelect.value;
-      const semana = semanaSelect.value;
+/* -------------------- */
+/* MESOCICLOS */
+/* -------------------- */
 
-      const filtered = exercises.filter(
-        (ex) => ex.meso === meso && ex.semana === semana
-      );
-
-      if (filtered.length === 0) {
-        emptyState.style.display = "block";
-        return;
-      } else {
-        emptyState.style.display = "none";
-      }
-
-      filtered.forEach((item) => {
-        const isRecent = item.id === lastAddedId;
-        const row = createExerciseRow(item, isRecent);
-        list.appendChild(row);
-      });
-    }
-
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-
-      const nombre = document.getElementById("nombre").value.trim();
-      const series = document.getElementById("series").value.trim();
-      const reps = document.getElementById("reps").value.trim();
-      const peso = document.getElementById("peso").value.trim();
-      const grupo = document.getElementById("grupo").value;
-      const meso = mesoSelect.value;
-      const semana = semanaSelect.value;
-
-      if (!nombre) {
-        alert("Pon al menos el nombre del ejercicio.");
+function renderMesos() {
+  mesoContainer.innerHTML = "";
+  data.mesos.forEach(m => {
+    const card = document.createElement("div");
+    card.className = "meso-card";
+    card.innerHTML = `
+      <span>${m.nombre}</span>
+      <span class="meso-delete">❌</span>
+    `;
+    card.onclick = e => {
+      if (e.target.classList.contains("meso-delete")) {
+        data.mesos = data.mesos.filter(x => x.id !== m.id);
+        renderMesos();
+        save();
         return;
       }
+      openMeso(m.id);
+    };
+    mesoContainer.appendChild(card);
+  });
+}
 
-      const id = Date.now().toString(36) + Math.random().toString(36).slice(2);
+addMeso.onclick = () => {
+  const id = Date.now().toString();
+  data.mesos.push({
+    id,
+    nombre: "Mesociclo " + (data.mesos.length + 1),
+    semanas: {1:[],2:[],3:[],4:[]}
+  });
+  renderMesos();
+  save();
+};
 
-      const item = {
-        id,
-        nombre,
-        series,
-        reps,
-        peso,
-        grupo,
-        meso,
-        semana,
-      };
+/* -------------------- */
+/* ABRIR MESOCICLO */
+/* -------------------- */
 
-      exercises.push(item);
-      saveToStorage();
-      renderList(id);
+function openMeso(id) {
+  currentMeso = data.mesos.find(m => m.id === id);
+  mesoTitle.textContent = currentMeso.nombre;
+  weekTabs.style.display = "flex";
+  exerciseForm.style.display = "grid";
+  renderWeeks();
+  renderExercises();
+}
 
-      // limpiar campos pero mantener meso/semana/grupo
-      document.getElementById("nombre").value = "";
-      document.getElementById("series").value = "";
-      document.getElementById("reps").value = "";
-      document.getElementById("peso").value = "";
-      document.getElementById("nombre").focus();
-    });
+/* -------------------- */
+/* SEMANAS */
+/* -------------------- */
 
-    // Ocultar / mostrar panel
-    btnHidePanel.addEventListener("click", () => {
-      panel.classList.add("oculto");
-    });
+function renderWeeks() {
+  [...weekTabs.children].forEach(tab => {
+    tab.classList.toggle("active", tab.dataset.week == currentWeek);
+    tab.onclick = () => {
+      currentWeek = tab.dataset.week;
+      renderWeeks();
+      renderExercises();
+    };
+  });
+}
 
-    btnShowPanel.addEventListener("click", () => {
-      panel.classList.remove("oculto");
-    });
+/* -------------------- */
+/* EJERCICIOS */
+/* -------------------- */
 
-    // Cambios de mesociclo / semana
-    mesoSelect.addEventListener("change", () => {
-      updateCurrentBlockLabel();
-      renderList();
-    });
+function renderExercises() {
+  if (!currentMeso) return;
+  const list = currentMeso.semanas[currentWeek];
+  exerciseList.innerHTML = "";
 
-    semanaSelect.addEventListener("change", () => {
-      updateCurrentBlockLabel();
-      renderList();
-    });
+  list.forEach(ex => {
+    const row = document.createElement("div");
+    row.className = "exercise-row";
+    row.innerHTML = `
+      <span>${ex.nombre}</span>
+      <span>${ex.series}</span>
+      <span>${ex.reps}</span>
+      <span>${ex.peso}</span>
+      <span class="delete-ex">❌</span>
+    `;
+    row.querySelector(".delete-ex").onclick = () => {
+      currentMeso.semanas[currentWeek] =
+        currentMeso.semanas[currentWeek].filter(x => x.id !== ex.id);
+      renderExercises();
+    };
+    exerciseList.appendChild(row);
+  });
+}
 
-    // Inicializar
-    loadFromStorage();
-    updateCurrentBlockLabel();
-    renderList();
-  </script>
+/* -------------------- */
+/* AÑADIR EJERCICIO */
+/* -------------------- */
+
+exerciseForm.onchange = exerciseForm.oninput = () => {
+  const ex = {
+    id: Date.now().toString(),
+    nombre: exName.value,
+    series: exSeries.value,
+    reps: exReps.value,
+    peso: exPeso.value,
+    grupo: exGrupo.value
+  };
+
+  if (!ex.nombre) return;
+
+  currentMeso.semanas[currentWeek].push(ex);
+  renderExercises();
+
+  // Glow azul
+  const rows = exerciseList.querySelectorAll(".exercise-row");
+  const last = rows[rows.length - 1];
+  last.classList.add("recent");
+  setTimeout(() => last.classList.remove("recent"), 2500);
+
+  // Limpiar campos
+  exName.value = "";
+  exSeries.value = "";
+  exReps.value = "";
+  exPeso.value = "";
+  exGrupo.value = "";
+};
+
+/* -------------------- */
+/* GUARDAR */
+/* -------------------- */
+
+function save() {
+  localStorage.setItem("gymx-pro", JSON.stringify(data));
+}
+
+saveBtn.onclick = save;
+
+/* -------------------- */
+/* INICIO */
+/* -------------------- */
+
+renderMesos();
+
+</script>
+
 </body>
 </html>
