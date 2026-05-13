@@ -1,483 +1,707 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<title>GymX</title>
+  <meta charset="UTF-8" />
+  <title>GymX Planner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #05060a;
+      --panel: #0b0f1a;
+      --accent: #35d0ff;
+      --accent-soft: rgba(53, 208, 255, 0.15);
+      --text: #f5f7ff;
+      --muted: #8b93b8;
+      --danger: #ff4b6e;
+      --border: #1a2135;
+      --recent: #18263b;
+    }
 
-<style>
-/* ---------------------- */
-/* ESTILO MINIMAL‑TECH    */
-/* ---------------------- */
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        sans-serif;
+    }
 
-:root {
-  --bg: #0b0c10;
-  --panel: #111317;
-  --panel-light: #161920;
-  --accent: #1e88e5;
-  --accent-soft: rgba(30, 136, 229, 0.2);
-  --text: #e5e7eb;
-  --muted: #9ca3af;
-  --border: #1f2937;
-}
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
 
-* {
-  box-sizing: border-box;
-  font-family: "Inter", system-ui, sans-serif;
-}
+    body {
+      background: radial-gradient(circle at top, #10152b 0, #05060a 55%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      padding: 8px;
+    }
 
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
-}
+    .app {
+      width: 100%;
+      max-width: 1100px;
+      background: linear-gradient(135deg, #05060a 0, #05060a 40%, #0b0f1a 100%);
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.7);
+      display: grid;
+      grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+      overflow: hidden;
+      position: relative;
+      min-height: calc(100vh - 16px);
+    }
 
-/* ---------------------- */
-/* BARRA LATERAL          */
-/* ---------------------- */
+    @media (max-width: 800px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+    }
 
-.sidebar {
-  width: 260px;
-  background: var(--panel);
-  border-right: 1px solid var(--border);
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.3s ease;
-  position: relative;
-}
+    /* PANEL IZQUIERDO */
 
-.sidebar.hidden {
-  transform: translateX(-260px);
-}
+    .panel {
+      position: relative;
+      padding: 16px 16px 18px;
+      background: radial-gradient(circle at top left, #18213b 0, #05060a 55%);
+      border-right: 1px solid var(--border);
+      transition: transform 0.25s ease, opacity 0.25s ease;
+      z-index: 2;
+    }
 
-.logo {
-  font-size: 1.8rem;
-  font-weight: 800;
-  margin-bottom: 1.5rem;
-}
+    .panel.oculto {
+      transform: translateX(-100%);
+      opacity: 0;
+      pointer-events: none;
+    }
 
-.logo span {
-  color: var(--accent);
-}
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
 
-.meso-list {
-  flex: 1;
-  overflow-y: auto;
-}
+    .panel-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
 
-.meso-item {
-  padding: 0.7rem;
-  border-radius: 6px;
-  margin-bottom: 0.4rem;
-  cursor: pointer;
-  background: var(--panel-light);
-  border: 1px solid var(--border);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+    .btn-toggle-panel {
+      border: none;
+      background: rgba(5, 6, 10, 0.7);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 6px 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+      transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.1s;
+    }
 
-.meso-item.active {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-}
+    .btn-toggle-panel span.icon {
+      font-size: 0.9rem;
+    }
 
-.meso-item .delete {
-  color: #e57373;
-  cursor: pointer;
-  font-size: 1.1rem;
-}
+    .btn-toggle-panel:hover {
+      background: rgba(24, 33, 59, 0.9);
+      color: var(--text);
+      border-color: var(--accent);
+    }
 
-/* Botón para ocultar barra */
-.toggle-sidebar {
-  position: absolute;
-  top: 10px;
-  right: -18px;
-  background: var(--accent);
-  border: none;
-  color: white;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: 0.3s;
-  font-size: 1rem;
-}
+    .btn-toggle-panel:active {
+      transform: scale(0.96);
+    }
 
-/* ---------------------- */
-/* PANEL PRINCIPAL        */
-/* ---------------------- */
+    .form {
+      display: grid;
+      gap: 10px;
+      margin-top: 4px;
+    }
 
-.main {
-  flex: 1;
-  overflow-y: auto;
-  padding: 1.5rem;
-}
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
 
-h2 {
-  margin-top: 0;
-}
+    .field label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
 
-/* Pestañas de semanas */
-.tabs {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
+    .field input,
+    .field select {
+      background: rgba(5, 6, 10, 0.9);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      color: var(--text);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    }
 
-.tab {
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  background: var(--panel-light);
-  border: 1px solid var(--border);
-  cursor: pointer;
-}
+    .field input:focus,
+    .field select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(53, 208, 255, 0.4);
+      background: #05060a;
+    }
 
-.tab.active {
-  background: var(--accent);
-  border-color: var(--accent);
-}
+    .row-inline {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
 
-/* Días */
-.day {
-  background: var(--panel-light);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-}
+    .row-inline-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
 
-/* Encabezado columnas */
-.columns {
-  display: grid;
-  grid-template-columns: 2fr 1fr 2fr 1fr 1fr;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: var(--muted);
-}
+    .btn-save {
+      margin-top: 6px;
+      align-self: flex-end;
+      border: none;
+      cursor: pointer;
+      border-radius: 999px;
+      padding: 8px 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: radial-gradient(circle at top, #35d0ff 0, #0070f3 55%, #003566 100%);
+      color: #05060a;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      box-shadow: 0 0 18px rgba(53, 208, 255, 0.7);
+      position: relative;
+      overflow: hidden;
+    }
 
-/* Fila de ejercicio */
-.exercise-row {
-  display: grid;
-  grid-template-columns: 2fr 1fr 2fr 1fr 1fr;
-  gap: 0.5rem;
-  margin-bottom: 0.6rem;
-  align-items: center;
-}
+    .btn-save span.text {
+      display: none; /* solo icono */
+    }
 
-/* Inputs estilo A */
-input, select {
-  background: var(--panel);
-  border: 1px solid var(--accent);
-  color: var(--text);
-  padding: 0.4rem;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  width: 100%;
-}
+    .btn-save .icon-save {
+      width: 22px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-input:focus, select:focus {
-  outline: none;
-  box-shadow: 0 0 6px var(--accent);
-}
+    .btn-save svg {
+      width: 100%;
+      height: 100%;
+      fill: #05060a;
+      filter: drop-shadow(0 0 6px rgba(5, 6, 10, 0.7));
+    }
 
-/* Botón añadir ejercicio */
-.add-ex-btn {
-  margin-top: 0.8rem;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: white;
-  border: none;
-  font-size: 1.4rem;
-  cursor: pointer;
-}
+    .btn-save::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        120deg,
+        transparent 0,
+        rgba(255, 255, 255, 0.4) 40%,
+        transparent 80%
+      );
+      transform: translateX(-120%);
+      transition: transform 0.5s ease;
+    }
 
-/* ---------------------- */
-/* BOTÓN GUARDAR FLOTANTE */
-/* ---------------------- */
+    .btn-save:hover::after {
+      transform: translateX(120%);
+    }
 
-.save-btn {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: white;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  box-shadow: 0 0 15px rgba(30, 136, 229, 0.6);
-  transition: 0.2s;
-}
+    .btn-save:active {
+      transform: scale(0.96);
+    }
 
-.save-btn:hover {
-  transform: scale(1.1);
-}
+    /* PANEL DERECHO */
 
-/* ---------------------- */
-/* RESPONSIVE             */
-/* ---------------------- */
+    .main {
+      padding: 16px 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+    }
 
-@media (max-width: 800px) {
-  .sidebar {
-    position: absolute;
-    z-index: 10;
-    height: 100%;
-  }
-}
-</style>
+    .main-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 4px;
+      flex-wrap: wrap;
+    }
+
+    .main-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .hint {
+      font-size: 0.75rem;
+      color: var(--muted);
+      opacity: 0.9;
+    }
+
+    .current-block {
+      font-size: 0.8rem;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 4px 10px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .list {
+      margin-top: 4px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: radial-gradient(circle at top left, #11182b 0, #05060a 60%);
+      padding: 8px;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .list-header,
+    .exercise-row {
+      display: grid;
+      grid-template-columns: 1.2fr 0.6fr 0.6fr 0.6fr 0.3fr;
+      gap: 6px;
+      align-items: center;
+      padding: 6px 8px;
+      font-size: 0.8rem;
+    }
+
+    .list-header {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.7rem;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 4px;
+    }
+
+    .exercise-row {
+      border-radius: 10px;
+      background: rgba(5, 6, 10, 0.7);
+      border: 1px solid transparent;
+      transition: background 0.2s, border-color 0.2s, transform 0.1s;
+    }
+
+    .exercise-row.recent {
+      background: var(--recent);
+      border-color: var(--accent);
+      box-shadow: 0 0 12px rgba(53, 208, 255, 0.4);
+    }
+
+    .exercise-row span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      margin-left: 4px;
+    }
+
+    .badge-small {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-left: 4px;
+    }
+
+    .btn-delete {
+      border: none;
+      background: transparent;
+      color: var(--danger);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      width: 26px;
+      height: 26px;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-delete:hover {
+      background: rgba(255, 75, 110, 0.12);
+    }
+
+    .btn-delete:active {
+      transform: scale(0.9);
+    }
+
+    .empty {
+      padding: 12px 10px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    /* BOTÓN FLOTANTE PARA MOSTRAR PANEL SI ESTÁ OCULTO (PC Y MÓVIL) */
+
+    .floating-toggle {
+      position: absolute;
+      left: 10px;
+      top: 10px;
+      z-index: 5;
+    }
+  </style>
 </head>
-
 <body>
+  <div class="app">
+    <!-- Botón flotante para mostrar panel cuando está oculto -->
+    <button class="btn-toggle-panel floating-toggle" id="btnShowPanel">
+      <span class="icon">📋</span>
+      <span>Panel</span>
+    </button>
 
-<!-- SIDEBAR -->
-<div class="sidebar" id="sidebar">
-  <div class="logo">Gym<span>X</span></div>
-
-  <button class="toggle-sidebar" id="toggleSidebar">⮜</button>
-
-  <div class="meso-list" id="mesoList"></div>
-
-  <button id="addMeso">+ Añadir mesociclo</button>
-</div>
-
-<!-- MAIN PANEL -->
-<div class="main">
-  <h2 id="mesoTitle">Selecciona un mesociclo</h2>
-
-  <div class="tabs" id="tabs"></div>
-
-  <div id="weekContent"></div>
-</div>
-
-<!-- BOTÓN GUARDAR -->
-<button class="save-btn" id="saveBtn">💾</button>
-
-<script>
-/* ---------------------- */
-/* ESTRUCTURA DE DATOS    */
-/* ---------------------- */
-
-let data = { mesocycles: [] };
-let currentMeso = null;
-let currentWeek = 0;
-
-/* ---------------------- */
-/* GUARDAR MANUAL         */
-/* ---------------------- */
-
-document.getElementById("saveBtn").onclick = () => {
-  localStorage.setItem("gymx-data", JSON.stringify(data));
-  alert("Cambios guardados");
-};
-
-/* ---------------------- */
-/* CARGAR DATOS           */
-/* ---------------------- */
-
-function load() {
-  const saved = localStorage.getItem("gymx-data");
-  if (saved) data = JSON.parse(saved);
-  renderSidebar();
-}
-
-load();
-
-/* ---------------------- */
-/* SIDEBAR                */
-/* ---------------------- */
-
-function renderSidebar() {
-  const list = document.getElementById("mesoList");
-  list.innerHTML = "";
-
-  data.mesocycles.forEach((m, i) => {
-    const div = document.createElement("div");
-    div.className = "meso-item" + (i === currentMeso ? " active" : "");
-    div.innerHTML = `
-      <span>${m.name}</span>
-      <span class="delete" onclick="deleteMeso(${i}); event.stopPropagation();">❌</span>
-    `;
-    div.onclick = () => selectMeso(i);
-    list.appendChild(div);
-  });
-}
-
-document.getElementById("addMeso").onclick = () => {
-  data.mesocycles.push({
-    name: "Mesociclo " + (data.mesocycles.length + 1),
-    weeks: [createWeek(), createWeek(), createWeek(), createWeek()]
-  });
-  renderSidebar();
-};
-
-function deleteMeso(i) {
-  data.mesocycles.splice(i, 1);
-  currentMeso = null;
-  document.getElementById("mesoTitle").textContent = "Selecciona un mesociclo";
-  document.getElementById("tabs").innerHTML = "";
-  document.getElementById("weekContent").innerHTML = "";
-  renderSidebar();
-}
-
-/* ---------------------- */
-/* SELECCIONAR MESOCICLO  */
-/* ---------------------- */
-
-function selectMeso(i) {
-  currentMeso = i;
-  currentWeek = 0;
-  renderSidebar();
-  renderMeso();
-}
-
-function renderMeso() {
-  const meso = data.mesocycles[currentMeso];
-  document.getElementById("mesoTitle").textContent = meso.name;
-
-  renderTabs();
-  renderWeek();
-}
-
-/* ---------------------- */
-/* PESTAÑAS SEMANAS       */
-/* ---------------------- */
-
-function renderTabs() {
-  const tabs = document.getElementById("tabs");
-  tabs.innerHTML = "";
-
-  data.mesocycles[currentMeso].weeks.forEach((_, i) => {
-    const t = document.createElement("div");
-    t.className = "tab" + (i === currentWeek ? " active" : "");
-    t.textContent = "Semana " + (i + 1);
-    t.onclick = () => {
-      currentWeek = i;
-      renderTabs();
-      renderWeek();
-    };
-    tabs.appendChild(t);
-  });
-}
-
-/* ---------------------- */
-/* SEMANA → DÍAS          */
-/* ---------------------- */
-
-function createWeek() {
-  return [
-    createDay("Día 1"),
-    createDay("Día 2"),
-    createDay("Día 3")
-  ];
-}
-
-function createDay(name) {
-  return {
-    name,
-  exercises: []
-  };
-}
-
-function renderWeek() {
-  const container = document.getElementById("weekContent");
-  container.innerHTML = "";
-
-  const week = data.mesocycles[currentMeso].weeks[currentWeek];
-
-  week.forEach((day, dayIndex) => {
-    const d = document.createElement("div");
-    d.className = "day";
-
-    d.innerHTML = `
-      <h3 contenteditable="true">${day.name}</h3>
-
-      <div class="columns">
-        <div>Ejercicio</div>
-        <div>Series</div>
-        <div>Notas</div>
-        <div>Top set</div>
-        <div>Back off</div>
+    <!-- PANEL IZQUIERDO -->
+    <aside class="panel" id="panel">
+      <div class="panel-header">
+        <div class="panel-title">Nuevo ejercicio</div>
+        <button class="btn-toggle-panel" id="btnHidePanel">
+          <span class="icon">⮜</span>
+          <span>Ocultar</span>
+        </button>
       </div>
-    `;
 
-    day.exercises.forEach((ex, exIndex) => {
+      <form class="form" id="exerciseForm">
+        <div class="row-inline-2">
+          <div class="field">
+            <label for="meso">Mesociclo</label>
+            <select id="meso">
+              <option value="1">Mesociclo 1</option>
+              <option value="2">Mesociclo 2</option>
+              <option value="3">Mesociclo 3</option>
+              <option value="4">Mesociclo 4</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="semana">Semana</label>
+            <select id="semana">
+              <option value="1">Semana 1</option>
+              <option value="2">Semana 2</option>
+              <option value="3">Semana 3</option>
+              <option value="4">Semana 4</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="nombre">Ejercicio</label>
+          <input
+            type="text"
+            id="nombre"
+            placeholder="Press banca, sentadilla..."
+            autocomplete="off"
+            required
+          />
+        </div>
+
+        <div class="row-inline">
+          <div class="field">
+            <label for="series">Series</label>
+            <input
+              type="number"
+              id="series"
+              min="1"
+              max="50"
+              inputmode="numeric"
+              placeholder="4"
+            />
+          </div>
+          <div class="field">
+            <label for="reps">Reps</label>
+            <input
+              type="number"
+              id="reps"
+              min="1"
+              max="100"
+              inputmode="numeric"
+              placeholder="10"
+            />
+          </div>
+          <div class="field">
+            <label for="peso">Peso</label>
+            <input
+              type="number"
+              id="peso"
+              min="0"
+              max="500"
+              step="0.5"
+              inputmode="decimal"
+              placeholder="60 kg"
+            />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="grupo">Grupo muscular</label>
+          <select id="grupo">
+            <option value="">Sin especificar</option>
+            <option value="Pecho">Pecho</option>
+            <option value="Espalda">Espalda</option>
+            <option value="Pierna">Pierna</option>
+            <option value="Hombro">Hombro</option>
+            <option value="Bíceps">Bíceps</option>
+            <option value="Tríceps">Tríceps</option>
+            <option value="Core">Core</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-save" title="Guardar ejercicio">
+          <span class="icon-save">
+            <!-- Icono futurista tipo chip / disco -->
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M5 3h9l5 5v13H5V3zm2 2v14h10V9.5L13.5 5H7zm3 2h2v4h-2V7zm-1 7h6v2H9v-2z"
+              />
+            </svg>
+          </span>
+          <span class="text">Guardar</span>
+        </button>
+      </form>
+    </aside>
+
+    <!-- PANEL DERECHO: LISTA -->
+    <main class="main">
+      <div class="main-header">
+        <div>
+          <div class="main-title">Rutina actual</div>
+          <div class="current-block" id="currentBlock">
+            Mesociclo 1 · Semana 1
+          </div>
+        </div>
+        <div class="hint">
+          Se guarda en el dispositivo. El último ejercicio añadido se resalta.
+        </div>
+      </div>
+
+      <section class="list" id="exerciseList">
+        <div class="list-header">
+          <span>Ejercicio</span>
+          <span>Series</span>
+          <span>Reps</span>
+          <span>Peso</span>
+          <span></span>
+        </div>
+        <div class="empty" id="emptyState">
+          Aún no hay ejercicios en este mesociclo/semana.
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const form = document.getElementById("exerciseForm");
+    const list = document.getElementById("exerciseList");
+    const emptyState = document.getElementById("emptyState");
+    const panel = document.getElementById("panel");
+    const btnHidePanel = document.getElementById("btnHidePanel");
+    const btnShowPanel = document.getElementById("btnShowPanel");
+    const mesoSelect = document.getElementById("meso");
+    const semanaSelect = document.getElementById("semana");
+    const currentBlock = document.getElementById("currentBlock");
+
+    const STORAGE_KEY = "gymx-planner-v1";
+    let exercises = [];
+    let lastRecentTimeout = null;
+
+    function loadFromStorage() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        if (Array.isArray(data)) {
+          exercises = data;
+        }
+      } catch (e) {
+        console.error("Error cargando datos", e);
+      }
+    }
+
+    function saveToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(exercises));
+      } catch (e) {
+        console.error("Error guardando datos", e);
+      }
+    }
+
+    function updateCurrentBlockLabel() {
+      currentBlock.textContent =
+        "Mesociclo " + mesoSelect.value + " · Semana " + semanaSelect.value;
+    }
+
+    function createExerciseRow(item, isRecent) {
       const row = document.createElement("div");
       row.className = "exercise-row";
+      if (isRecent) row.classList.add("recent");
+
+      row.dataset.id = item.id;
 
       row.innerHTML = `
-        <input type="text" value="${ex.name}" oninput="updateExercise(${dayIndex}, ${exIndex}, 'name', this.value)">
-        <input type="number" value="${ex.series}" oninput="updateExercise(${dayIndex}, ${exIndex}, 'series', this.value)">
-        <input type="text" value="${ex.notes}" oninput="updateExercise(${dayIndex}, ${exIndex}, 'notes', this.value)">
-
-        <div style="display:flex; gap:4px;">
-          <input type="number" value="${ex.top}" oninput="updateExercise(${dayIndex}, ${exIndex}, 'top', this.value)">
-          <select onchange="updateExercise(${dayIndex}, ${exIndex}, 'topUnit', this.value)">
-            <option ${ex.topUnit==='kg'?'selected':''}>kg</option>
-            <option ${ex.topUnit==='lbs'?'selected':''}>lbs</option>
-          </select>
-        </div>
-
-        <div style="display:flex; gap:4px;">
-          <input type="number" value="${ex.back}" oninput="updateExercise(${dayIndex}, ${exIndex}, 'back', this.value)">
-          <select onchange="updateExercise(${dayIndex}, ${exIndex}, 'backUnit', this.value)">
-            <option ${ex.backUnit==='kg'?'selected':''}>kg</option>
-            <option ${ex.backUnit==='lbs'?'selected':''}>lbs</option>
-          </select>
-        </div>
+        <span>
+          ${item.nombre}
+          ${
+            item.grupo
+              ? `<span class="badge">${item.grupo}</span>`
+              : ""
+          }
+          <span class="badge-small">M${item.meso} · S${item.semana}</span>
+        </span>
+        <span>${item.series || "-"}</span>
+        <span>${item.reps || "-"}</span>
+        <span>${item.peso ? item.peso + " kg" : "-"}</span>
+        <button class="btn-delete" title="Eliminar ejercicio">
+          ✕
+        </button>
       `;
 
-      d.appendChild(row);
+      const deleteBtn = row.querySelector(".btn-delete");
+      deleteBtn.addEventListener("click", () => {
+        exercises = exercises.filter((ex) => ex.id !== item.id);
+        saveToStorage();
+        renderList();
+      });
+
+      if (isRecent) {
+        if (lastRecentTimeout) clearTimeout(lastRecentTimeout);
+        lastRecentTimeout = setTimeout(() => {
+          row.classList.remove("recent");
+        }, 3500);
+      }
+
+      return row;
+    }
+
+    function renderList(lastAddedId = null) {
+      const rowsOld = list.querySelectorAll(".exercise-row");
+      rowsOld.forEach((r) => r.remove());
+
+      const meso = mesoSelect.value;
+      const semana = semanaSelect.value;
+
+      const filtered = exercises.filter(
+        (ex) => ex.meso === meso && ex.semana === semana
+      );
+
+      if (filtered.length === 0) {
+        emptyState.style.display = "block";
+        return;
+      } else {
+        emptyState.style.display = "none";
+      }
+
+      filtered.forEach((item) => {
+        const isRecent = item.id === lastAddedId;
+        const row = createExerciseRow(item, isRecent);
+        list.appendChild(row);
+      });
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const nombre = document.getElementById("nombre").value.trim();
+      const series = document.getElementById("series").value.trim();
+      const reps = document.getElementById("reps").value.trim();
+      const peso = document.getElementById("peso").value.trim();
+      const grupo = document.getElementById("grupo").value;
+      const meso = mesoSelect.value;
+      const semana = semanaSelect.value;
+
+      if (!nombre) {
+        alert("Pon al menos el nombre del ejercicio.");
+        return;
+      }
+
+      const id = Date.now().toString(36) + Math.random().toString(36).slice(2);
+
+      const item = {
+        id,
+        nombre,
+        series,
+        reps,
+        peso,
+        grupo,
+        meso,
+        semana,
+      };
+
+      exercises.push(item);
+      saveToStorage();
+      renderList(id);
+
+      // limpiar campos pero mantener meso/semana/grupo
+      document.getElementById("nombre").value = "";
+      document.getElementById("series").value = "";
+      document.getElementById("reps").value = "";
+      document.getElementById("peso").value = "";
+      document.getElementById("nombre").focus();
     });
 
-    const addBtn = document.createElement("button");
-    addBtn.className = "add-ex-btn";
-    addBtn.textContent = "+";
-    addBtn.onclick = () => addExercise(dayIndex);
+    // Ocultar / mostrar panel
+    btnHidePanel.addEventListener("click", () => {
+      panel.classList.add("oculto");
+    });
 
-    d.appendChild(addBtn);
-    container.appendChild(d);
-  });
-}
+    btnShowPanel.addEventListener("click", () => {
+      panel.classList.remove("oculto");
+    });
 
-/* ---------------------- */
-/* EJERCICIOS             */
-/* ---------------------- */
+    // Cambios de mesociclo / semana
+    mesoSelect.addEventListener("change", () => {
+      updateCurrentBlockLabel();
+      renderList();
+    });
 
-function addExercise(dayIndex) {
-  const week = data.mesocycles[currentMeso].weeks[currentWeek];
-  week[dayIndex].exercises.push({
-    name: "",
-    series: "",
-    notes: "",
-    top: "",
-    topUnit: "kg",
-    back: "",
-    backUnit: "kg"
-  });
-  renderWeek();
-}
+    semanaSelect.addEventListener("change", () => {
+      updateCurrentBlockLabel();
+      renderList();
+    });
 
-function updateExercise(dayIndex, exIndex, field, value) {
-  data.mesocycles[currentMeso].weeks[currentWeek][dayIndex].exercises[exIndex][field] = value;
-}
-
-/* ---------------------- */
-/* OCULTAR BARRA LATERAL  */
-/* ---------------------- */
-
-document.getElementById("toggleSidebar").onclick = () => {
-  document.getElementById("sidebar").classList.toggle("hidden");
-};
-</script>
-
+    // Inicializar
+    loadFromStorage();
+    updateCurrentBlockLabel();
+    renderList();
+  </script>
 </body>
 </html>
